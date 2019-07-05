@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+<html>
+ <head>
+  <title>JSON - Dynamic Dependent Dropdown List using Jquery and Ajax</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+ </head>
+ <body>
+  <br /><br />
+  <div class="container">
+   <h2 align="center">JSON - Dynamic Dependent Dropdown List using Jquery and Ajax</h2><br /><br />
+   <select name="course" id="course" class="form-control input-lg">
+    <option value="">Select course</option>
+   </select>
+   <br />
+   <select name="year" id="year" class="form-control input-lg">
+    <option value="">Select academic year</option>
+   </select>
+   <br />
+   <select name="division" id="division" class="form-control input-lg">
+    <option value="">Select Division</option>
+   </select>
+   <br />
+   <select name="type" id="type" class="form-control input-lg">
+    <option value="">Select teaching method</option>
+   </select>
+   <br />
+  </div>
+    
+  <div class="container" id="dropdowns">
+     
+  </div>
+    
+  <div class="container">
+    <br />
+    <button type="button" class="btn btn-info btn-block">Get Attendence Sheet</button>   
+  </div>
+ </body>
+</html>
+
+<script type="application/javascript">
+$(document).ready(function(){
+
+ load_json_data('course');
+
+ function load_json_data(id, parent_id)
+ {
+  var html_code = '';
+  $.getJSON('https://api.myjson.com/bins/u2tx8', function(data){
+
+   html_code += '<option value="">Select '+id+'</option>';
+   $.each(data, function(key, value){
+    if(id == 'course')
+    {
+     if(value.parent_id == '0')
+     {
+      html_code += '<option value="'+value.id+'">'+value.name+'</option>';
+     }
+    }
+    else
+    {
+     if(value.parent_id == parent_id)
+     {
+      html_code += '<option value="'+value.id+'">'+value.name+'</option>';
+     }
+    }
+   });
+   $('#'+id).html(html_code);
+  });
+ }
+
+ $(document).on('change', '#course', function(){
+  var course_id = $(this).val();
+  if(course_id != '')
+  {
+   load_json_data('year', course_id);
+  }
+  else
+  {
+   $('#year').html('<option value="">Select Year</option>');
+   $('#division').html('<option value="">Select Division</option>');
+   $('#type').html('<option value="">Select teaching method</option>');
+  }
+ });
+ 
+  $(document).on('change', '#year', function(){
+  var year_id = $(this).val();
+  if(year_id != '')
+  {
+   load_json_data('division', year_id);
+  }
+  else
+  {
+   $('#division').html('<option value="">Select division</option>');
+  }
+ });
+ 
+  $(document).on('change', '#division', function(){
+  var division_id = $(this).val();
+  if(division_id != '')
+  {
+   load_json_data('type', division_id);
+  }
+  else
+  {
+   $('#type').html('<option value="">Select method of teaching</option>');
+  }
+ });
+    
+ $(document).on('change', '#type', function(){
+  
+  var type_id = $(this).val();
+  var id_mod = type_id % 2;
+  if(type_id != '' && id_mod == '1')
+  {
+   load_json_data_keys(type_id);
+  }
+     
+     
+     function load_json_data_keys(parent_id)
+ {
+  $.getJSON('https://api.myjson.com/bins/u2tx8', function(data){
+
+   $.each(data, function(key, value){
+    
+     if(value.id == parent_id)
+     {
+        key_value = value.key;
+         
+     }
+    
+   });
+  });
+ }
+     
+     
+     
+     
+     
+  $("#dropdowns").html("");
+  if(type_id%2==0){
+      //alert("even")
+      
+      $("#dropdowns").append("<select name='batch' id='batch' class='form-control input-lg'>\
+      <option value=''>Select Batch</option>\
+        </select>");
+      
+  }
+  
+  if(type_id != '')
+  {
+   //load_json_data('type', type_id);
+  }
+  else
+  {
+   $('#type').html('<option value="">Select method of teaching</option>');
+  }
+ });
+    
+ 
+});
+</script>
+
